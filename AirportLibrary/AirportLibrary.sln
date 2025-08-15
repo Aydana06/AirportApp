@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportLibrary", "AirportLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentNativeApp", "..\AgentNativeApp\AgentNativeApp.csproj", "{A2F7584D-827A-4237-A813-5347F4C62316}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportWebApp", "..\AirportWebApp\AirportWebApp.csproj", "{B293549F-C04C-4F1B-9221-0B6C68DFB5B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A2F7584D-827A-4237-A813-5347F4C62316}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2F7584D-827A-4237-A813-5347F4C62316}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2F7584D-827A-4237-A813-5347F4C62316}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B293549F-C04C-4F1B-9221-0B6C68DFB5B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B293549F-C04C-4F1B-9221-0B6C68DFB5B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B293549F-C04C-4F1B-9221-0B6C68DFB5B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B293549F-C04C-4F1B-9221-0B6C68DFB5B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
