@@ -3,167 +3,170 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 
-namespace AirportLibrary.repo
+namespace AirportLibrary.repo;
+
+public class SeatRepository
 {
-    public class SeatRepository
+    private readonly Database _db;
+
+    public SeatRepository(Database db)
     {
-        private readonly Database _context;
+        _db = db;
+    }
 
-        // SQL Query-үүдийг төвлөрүүлэх
-        private const string GetSeatBySeatNoQuery = "SELECT Id, SeatNo, FlightId, IsTaken FROM Seats WHERE SeatNo = @seatNo AND FlightId = @flightId";
-        private const string GetAvailableSeatsQuery = "SELECT Id, SeatNo, FlightId, IsTaken FROM Seats WHERE FlightId = @flightId AND IsTaken = 0";
-        private const string IsSeatTakenQuery = "SELECT COUNT(1) FROM Seats WHERE FlightId = @flightId AND SeatNo = @seatNo AND IsTaken = 1";
-        private const string GetSeatByPassengerQuery = @"
-            SELECT s.Id, s.SeatNo, s.FlightId, s.IsTaken 
-            FROM Seats s
-            JOIN Passengers p ON s.SeatNo = p.SeatNo AND s.FlightId = p.FlightId
-            WHERE p.Id = @passengerId";
+    /// <summary>
+    /// Суудлын дугаар дээр үндэслэн нислэгийн тодорхой суудлыг олох
+    /// </summary>
+    /// <param name="seatNo"></param>
+    /// <param name="flightId"></param>
+    /// <returns></returns>
+    public Seat? GetBySeatNo(string seatNo, int flightId)
+    {
+        using var conn = _db.CreateConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT Id, SeatNo, FlightId, IsTaken FROM Seats WHERE SeatNo = @seatNo AND FlightId = @flightId";
+        cmd.Parameters.AddWithValue("@seatNo", seatNo);
+        cmd.Parameters.AddWithValue("@flightId", flightId);
 
-        public SeatRepository(Database context)
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
         {
-            _context = context;
-        }
-
-        public Seat? GetBySeatNo(string seatNo, int flightId)
-        {
-            using var conn = _context.CreateConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = GetSeatBySeatNoQuery;
-            cmd.Parameters.AddWithValue("@seatNo", seatNo);
-            cmd.Parameters.AddWithValue("@flightId", flightId);
-
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
+            return new Seat
             {
-                return new Seat
-                {
-                    Id = reader.GetInt32(0),
-                    SeatNo = reader.GetString(1),
-                    FlightId = reader.GetInt32(2),
-                    isTaken = reader.GetBoolean(3)  // 👉 Direct boolean
-                };
-            }
-
-            return null;
+                Id = reader.GetInt32(0),
+                SeatNo = reader.GetString(1),
+                FlightId = reader.GetInt32(2),
+                isTaken = reader.GetInt32(3) == 1
+            };
         }
 
-        public List<Seat> GetAvailableSeats(int flightId)
+        return null;
+    }
+    /// <summary>
+    /// /// Нислэгийн боломжтой (аваагүй) суудлын жагсаалтыг гаргана.
+    /// </summary>
+    /// <param name="flightId"></param>
+    /// <returns></returns>
+    public List<Seat> GetAvailableSeats(int flightId)
+    {
+        var seats = new List<Seat>();
+        using var conn = _db.CreateConnection();
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT Id, SeatNo, FlightId, IsTaken FROM Seats WHERE FlightId = @flightId AND IsTaken = 0";
+        cmd.Parameters.AddWithValue("@flightId", flightId);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
         {
-            var seats = new List<Seat>();
-            using var conn = _context.CreateConnection();
-            var cmd = conn.CreateCommand();
-            cmd.CommandText = GetAvailableSeatsQuery;
-            cmd.Parameters.AddWithValue("@flightId", flightId);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            seats.Add(new Seat
             {
-                seats.Add(new Seat
-                {
-                    Id = reader.GetInt32(0),
-                    SeatNo = reader.GetString(1),
-                    FlightId = reader.GetInt32(2),
-                    isTaken = reader.GetBoolean(3)
-                });
-            }
-
-            return seats;
+                Id = reader.GetInt32(0),
+                SeatNo = reader.GetString(1),
+                FlightId = reader.GetInt32(2),
+                isTaken = reader.GetInt32(3) == 1
+            });
         }
 
-        public bool IsSeatTaken(int flightId, string seatNo)
+        return seats;
+    }
+
+    /// <summary>
+    /// /// Нислэгт аль хэдийн тодорхой суудал авсан эсэхийг шалгана.
+    /// </summary>
+    /// <param name="flightId"></param>
+    /// <param name="seatNo"></param>
+    /// <returns></returns>
+    public bool IsSeatTaken(int flightId, string seatNo)
+    {
+        using var conn = _db.CreateConnection();
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(1) FROM Seats WHERE FlightId = @flightId AND SeatNo = @seatNo AND IsTaken = 1";
+        cmd.Parameters.AddWithValue("@flightId", flightId);
+        cmd.Parameters.AddWithValue("@seatNo", seatNo);
+
+        var result = (long)cmd.ExecuteScalar();
+        return result > 0;
+    }
+
+    /// <summary>
+    /// /// Суудал нь бэлэн байгаа бөгөөд нислэгийн статус зөвшөөрсөн тохиолдолд зорчигчдод суудал онооно.
+    /// </summary>
+    /// <param name="passengerId"></param>
+    /// <param name="seatNo"></param>
+    /// <param name="flightId"></param>
+    /// <returns></returns>
+    public bool AssignSeatToPassenger(int passengerId, string seatNo, int flightId)
+    {
+        using var conn = _db.CreateConnection();
+        using var transaction = conn.BeginTransaction();
+
+        // Flight статус шалгах
+        using var checkFlightCmd = conn.CreateCommand();
+        checkFlightCmd.CommandText = "SELECT Status FROM Flights WHERE Id = @flightId";
+        checkFlightCmd.Parameters.AddWithValue("@flightId", flightId);
+        var status = (string?)checkFlightCmd.ExecuteScalar();
+
+        if (string.IsNullOrEmpty(status) || status != "Бүртгэж байна")
+            return false;  // Нислэг олдоогүй эсвэл бүртгэх боломжгүй
+
+        // Суудал эзлэгдсэн эсэх шалгах
+        var checkSeat = conn.CreateCommand();
+        checkSeat.CommandText = "SELECT IsTaken FROM Seats WHERE FlightId = @flightId AND SeatNo = @seatNo";
+        checkSeat.Parameters.AddWithValue("@flightId", flightId);
+        checkSeat.Parameters.AddWithValue("@seatNo", seatNo);
+
+        var isTaken = (long)checkSeat.ExecuteScalar();
+        if (isTaken == 1)
+            return false;  // аль хэдийн суудал эзэлсэн
+
+        // Суудлыг IsTaken болгож оноох
+        var updateSeat = conn.CreateCommand();
+        updateSeat.CommandText = "UPDATE Seats SET IsTaken = 1 WHERE FlightId = @flightId AND SeatNo = @seatNo";
+        updateSeat.Parameters.AddWithValue("@flightId", flightId);
+        updateSeat.Parameters.AddWithValue("@seatNo", seatNo);
+        updateSeat.ExecuteNonQuery();
+
+        // Passenger-д суудал оноох
+        var updatePassenger = conn.CreateCommand();
+        updatePassenger.CommandText = "UPDATE Passengers SET SeatNo = @seatNo WHERE Id = @passengerId";
+        updatePassenger.Parameters.AddWithValue("@seatNo", seatNo);
+        updatePassenger.Parameters.AddWithValue("@passengerId", passengerId);
+        updatePassenger.ExecuteNonQuery();
+
+        transaction.Commit();
+        return true;
+    }
+    /// <summary>
+    /// /// Тодорхой нислэгийн зорчигчдод хуваарилагдсан суудлыг авна.
+    /// </summary>
+    /// <param name="passengerId"></param>
+    /// <param name="flightId"></param>
+    /// <returns></returns>
+    public Seat? GetSeatByPassenger(int passengerId, int flightId)
+    {
+        using var conn = _db.CreateConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+                SELECT Id, SeatNo, FlightId, IsTaken 
+                FROM Seats 
+                WHERE SeatNo = (SELECT SeatNo FROM Passengers WHERE Id = @passengerId) 
+                AND FlightId = @flightId AND SeatNo IS NOT NULL";
+
+        cmd.Parameters.AddWithValue("@passengerId", passengerId);
+        cmd.Parameters.AddWithValue("@flightId", flightId);
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
         {
-            using var conn = _context.CreateConnection();
-            var cmd = conn.CreateCommand();
-            cmd.CommandText = IsSeatTakenQuery;
-            cmd.Parameters.AddWithValue("@flightId", flightId);
-            cmd.Parameters.AddWithValue("@seatNo", seatNo);
-
-            var result = (long)cmd.ExecuteScalar();
-            return result > 0;
+            return new Seat
+            {
+                Id = reader.GetInt32(0),
+                SeatNo = reader.GetString(1),
+                FlightId = reader.GetInt32(2),
+                isTaken = reader.GetInt32(3) == 1
+            };
         }
 
-        public bool AssignSeatToPassenger(int passengerId, string seatNo, int flightId)
-        {
-            using var conn = _context.CreateConnection();
-            using var transaction = conn.BeginTransaction();
-
-            try
-            {
-                // 🔍 Check flight status
-                using var checkFlightCmd = conn.CreateCommand();
-                checkFlightCmd.Transaction = transaction;
-                checkFlightCmd.CommandText = "SELECT Status FROM Flights WHERE Id = @flightId";
-                checkFlightCmd.Parameters.AddWithValue("@flightId", flightId);
-                var status = (string?)checkFlightCmd.ExecuteScalar();
-
-                if (string.IsNullOrEmpty(status) || status != "Бүртгэж байна")
-                {
-                    transaction.Rollback();
-                    return false;
-                }
-
-                // 🔍 Check if seat is already taken
-                using var checkCmd = conn.CreateCommand();
-                checkCmd.Transaction = transaction;
-                checkCmd.CommandText = "SELECT IsTaken FROM Seats WHERE FlightId = @flightId AND SeatNo = @seatNo";
-                checkCmd.Parameters.AddWithValue("@flightId", flightId);
-                checkCmd.Parameters.AddWithValue("@seatNo", seatNo);
-                var isTaken = (long)checkCmd.ExecuteScalar();
-
-                if (isTaken == 1)
-                {
-                    transaction.Rollback();
-                    return false;
-                }
-
-                // ✅ Update seat
-                using var updateSeat = conn.CreateCommand();
-                updateSeat.Transaction = transaction;
-                updateSeat.CommandText = "UPDATE Seats SET IsTaken = 1 WHERE FlightId = @flightId AND SeatNo = @seatNo";
-                updateSeat.Parameters.AddWithValue("@flightId", flightId);
-                updateSeat.Parameters.AddWithValue("@seatNo", seatNo);
-                updateSeat.ExecuteNonQuery();
-
-                // ✅ Assign seat to passenger
-                using var updatePassenger = conn.CreateCommand();
-                updatePassenger.Transaction = transaction;
-                updatePassenger.CommandText = "UPDATE Passengers SET SeatNo = @seatNo WHERE Id = @passengerId";
-                updatePassenger.Parameters.AddWithValue("@seatNo", seatNo);
-                updatePassenger.Parameters.AddWithValue("@passengerId", passengerId);
-                updatePassenger.ExecuteNonQuery();
-
-                transaction.Commit();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error assigning seat: {ex.Message}");
-                transaction.Rollback();
-                return false;
-            }
-        }
-
-        public Seat? GetSeatByPassenger(int passengerId, int flightId)
-        {
-            using var conn = _context.CreateConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = GetSeatByPassengerQuery;
-            cmd.Parameters.AddWithValue("@passengerId", passengerId);
-            cmd.Parameters.AddWithValue("@flightId", flightId);
-
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new Seat
-                {
-                    Id = reader.GetInt32(0),
-                    SeatNo = reader.GetString(1),
-                    FlightId = reader.GetInt32(2),
-                    isTaken = reader.GetBoolean(3)
-                };
-            }
-
-            return null;
-        }
+        return null;
     }
 }

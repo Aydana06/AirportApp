@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 
 namespace Airport.services
 {
-    /// <summary>
-    /// Provides high-level business logic for managing seat assignments and queries.
-    /// </summary>
     public class SeatService
     {
         private readonly SeatRepository _seatRepository;
@@ -24,25 +21,34 @@ namespace Airport.services
         }
 
         /// <summary>
-        /// Retrieves all available seats for a given flight.
+        /// Тухайн нислэгийн боломжтой бүх суудлыг татаж авна.
         /// </summary>
+        /// <param name="flightId"></param>
+        /// <returns></returns>
         public List<Seat> GetAvailableSeats(int flightId)
         {
             return _seatRepository.GetAvailableSeats(flightId);
         }
 
         /// <summary>
-        /// Checks if a specific seat is already taken on a flight.
+        /// Нислэгт аль хэдийн тодорхой суудал авсан эсэхийг шалгана
         /// </summary>
+        /// <param name="flightId"></param>
+        /// <param name="seatNo"></param>
+        /// <returns></returns>
         public bool IsSeatAlreadyTaken(int flightId, string seatNo)
         {
             return _seatRepository.IsSeatTaken(flightId, seatNo);
         }
 
         /// <summary>
-        /// Tries to assign a seat to a passenger.
+        /// Зорчигчдод суудал оноохыг оролдоно.
         /// </summary>
-        /// <returns>True if seat assignment was successful; otherwise false.</returns>
+        /// <param name="passengerId"></param>
+        /// <param name="seatNo"></param>
+        /// <param name="flightId"></param>
+        /// <returns>Суудлын хуваарилалт амжилттай болсон бол true; үгүй бол false</returns>
+        /// <exception cref="ArgumentException"></exception>
         public bool AssignSeat(int passengerId, string seatNo, int flightId)
         {
             if (string.IsNullOrWhiteSpace(seatNo))
@@ -55,16 +61,22 @@ namespace Airport.services
         }
 
         /// <summary>
-        /// Gets the seat assigned to a specific passenger.
+        /// Тодорхой зорчигчдод хуваарилагдсан суудлыг авна.
         /// </summary>
+        /// <param name="passengerId"></param>
+        /// <param name="flightId"></param>
+        /// <returns></returns>
         public Seat? GetSeatForPassenger(int passengerId, int flightId)
         {
             return _seatRepository.GetSeatByPassenger(passengerId, flightId);
         }
 
         /// <summary>
-        /// Gets a seat object by seat number and flight ID.
+        /// Суудлын дугаар болон нислэгийн ID-аар суудлын объектыг авна.
         /// </summary>
+        /// <param name="seatNo"></param>
+        /// <param name="flightId"></param>
+        /// <returns></returns>
         public Seat? GetSeatDetails(string seatNo, int flightId)
         {
             return _seatRepository.GetBySeatNo(seatNo, flightId);
