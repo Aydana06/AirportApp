@@ -7,7 +7,7 @@ using AirportLibrary.model;
 
 namespace AirportLibrary.repo
 {
-    public class PassengerRepository
+    public class PassengerRepository: IPassengerRepository
     {
         private readonly Database _db;
         public PassengerRepository(Database db)

@@ -13,9 +13,9 @@ namespace Airport.services
 {
     public class SeatService
     {
-        private readonly SeatRepository _seatRepository;
+        private readonly ISeatRepository _seatRepository;
 
-        public SeatService(SeatRepository seatRepository)
+        public SeatService(ISeatRepository seatRepository)
         {
             _seatRepository = seatRepository;
         }

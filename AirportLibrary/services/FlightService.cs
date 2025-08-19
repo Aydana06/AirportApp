@@ -10,9 +10,9 @@ namespace AirportLibrary.services
 {
     public class FlightService
     {
-        private readonly FlightRepository _repository;
+        private readonly IFlightRepository _repository;
 
-        public FlightService(FlightRepository repository)
+        public FlightService(IFlightRepository repository)
         {
             _repository = repository;
         }
@@ -32,6 +32,14 @@ namespace AirportLibrary.services
         public List<Flight> ListAllFlights()
         {
             return _repository.GetAll();
+        }
+
+        public Flight? GetFlightById(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentException("ID must be greater than zero.", nameof(id));
+
+            return _repository.GetById(id);
         }
     }
 

@@ -10,9 +10,9 @@ namespace AirportLibrary.services
 {
     public class PassengerService
     {
-        private readonly PassengerRepository _repo;
+        private readonly IPassengerRepository _repo;
 
-        public PassengerService(PassengerRepository repo)
+        public PassengerService(IPassengerRepository repo)
         {
             _repo = repo;
         }

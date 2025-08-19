@@ -7,7 +7,7 @@ using AirportLibrary.model;
 
 namespace AirportLibrary.repo
 {
-    public class FlightRepository
+    public class FlightRepository: IFlightRepository
     {
         private readonly Database _db;
 

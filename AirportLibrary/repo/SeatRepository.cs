@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AirportLibrary.repo;
 
-public class SeatRepository
+public class SeatRepository : ISeatRepository
 {
     private readonly Database _db;
 
