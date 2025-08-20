@@ -33,6 +33,7 @@
             label2 = new Label();
             FlightCode = new TextBox();
             label3 = new Label();
+            lblStatus = new Label();
             SuspendLayout();
             // 
             // btnSave
@@ -43,6 +44,7 @@
             btnSave.TabIndex = 20;
             btnSave.Text = "Хадгалах";
             btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
             // 
             // StatusBox
             // 
@@ -78,11 +80,20 @@
             label3.TabIndex = 16;
             label3.Text = "Нислэгийн дугаар:";
             // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Location = new Point(67, 195);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(0, 20);
+            lblStatus.TabIndex = 21;
+            // 
             // FlightStatus
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(592, 290);
+            Controls.Add(lblStatus);
             Controls.Add(btnSave);
             Controls.Add(StatusBox);
             Controls.Add(label2);
@@ -101,5 +112,6 @@
         private Label label2;
         private TextBox FlightCode;
         private Label label3;
+        private Label lblStatus;
     }
 }

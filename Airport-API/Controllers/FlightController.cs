@@ -26,7 +26,7 @@ namespace Airport.Api.Controllers
         [HttpGet]
         public IActionResult GetAllFlights()
         {
-            var flights = _flightService.ListAllFlights;
+            var flights = _flightService.ListAllFlights();
             return Ok(flights);
         }
 
@@ -51,7 +51,7 @@ namespace Airport.Api.Controllers
         [HttpPut("UpdateStatus")]
         public async Task<IActionResult> UpdateStatus([FromBody] FlightStatusDto dto)
         {
-            var flight = _flightService.GetFlightById(dto.FlightId);
+            var flight = _flightService.GetFlightByCode(dto.FlightCode);
             if (flight == null)
                 return NotFound("Нислэг олдсонгүй");
 
@@ -61,7 +61,8 @@ namespace Airport.Api.Controllers
             await _hub.Clients.All.SendAsync("FlightStatusUpdated", new
             {
                 FlightId = flight.Id,
-                Status = flight.Status
+                flight.FlightCode,
+                status = flight.Status
             });
 
             return Ok("Нислэгийн төлөв амжилттай солигдлоо.");
@@ -72,7 +73,7 @@ namespace Airport.Api.Controllers
         /// </summary>
         public class FlightStatusDto
         {
-            public int FlightId { get; set; }
+            public string FlightCode { get; set; } = "";
             public string Status { get; set; } = "";
         }
 

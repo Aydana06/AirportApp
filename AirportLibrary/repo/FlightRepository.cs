@@ -32,7 +32,7 @@ namespace AirportLibrary.repo
                 flights.Add(new Flight
                 {
                     Id = reader.GetInt32(0),
-                    FlightNumber = reader.GetString(1),
+                    FlightCode = reader.GetString(1),
                     Status = reader.GetString(2)
                 });
 
@@ -58,7 +58,7 @@ namespace AirportLibrary.repo
                 return new Flight
                 {
                     Id = reader.GetInt32(0),
-                    FlightNumber = reader.GetString(1),
+                    FlightCode = reader.GetString(1),
                     Status = reader.GetString(2)
                 };
             }
@@ -96,7 +96,7 @@ namespace AirportLibrary.repo
                 return new Flight
                 {
                     Id = reader.GetInt32(0),
-                    FlightNumber = reader.GetString(1),
+                    FlightCode = reader.GetString(1),
                     Status = reader.GetString(2)
                 };
             }

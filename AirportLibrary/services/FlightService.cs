@@ -41,6 +41,26 @@ namespace AirportLibrary.services
 
             return _repository.GetById(id);
         }
+
+        /// <summary>
+        /// FlightCode-оор нислэг хайх сервис
+        /// </summary>
+        public Flight? GetFlightByCode(string flightCode)
+        {
+            if (string.IsNullOrWhiteSpace(flightCode))
+                throw new ArgumentException("Flight code хоосон байж болохгүй.");
+
+            var flight = _repository.GetByCode(flightCode);
+
+            if (flight == null)
+            {
+                // энд алдаа хаяж болно эсвэл null буцааж болно
+                Console.WriteLine($"Flight {flightCode} олдсонгүй.");
+                return null;
+            }
+
+            return flight;
+        }
     }
 
 }

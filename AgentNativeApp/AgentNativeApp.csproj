@@ -8,4 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Airport-API\Airport-API.csproj" />
+    <ProjectReference Include="..\AirportLibrary\AirportLibrary.csproj" />
+  </ItemGroup>
+
 </Project>

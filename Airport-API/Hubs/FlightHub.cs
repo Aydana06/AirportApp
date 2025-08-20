@@ -2,25 +2,12 @@
 
 namespace Airport.Api.Hubs
 {
-    /// <summary>
-    /// Нислэгийн мэдээллийн бодит цагийн шинэчлэлийг
-    /// клиентүүдэд илгээх SignalR Hub.
-    /// </summary>
     public class FlightHub : Hub
     {
-        /// <summary>
-        /// Нислэг шинэчлэгдсэн тухай бүх клиентүүдэд мэдэгдэнэ.
-        /// </summary>
-        public async Task NotifyFlightUpdated()
+        // Серверээс клиент рүү шинэчлэл push хийхэд ашиглана
+        public async Task SendStatusUpdate(string flightNumber, string status)
         {
-            await Clients.All.SendAsync(HubEvents.FlightUpdated);
+            await Clients.All.SendAsync("ReceiveStatusUpdate", flightNumber, status);
         }
     }
-
-    public static class HubEvents
-    {
-        public const string FlightUpdated = "FlightUpdated";
-        public const string SeatTaken = "SeatTaken";
-    }
-
 }

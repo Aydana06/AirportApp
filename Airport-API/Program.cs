@@ -1,6 +1,7 @@
 ﻿using Airport.Api.Hubs;
 using AirportLibrary;
 using AirportLibrary.repo;
+using AirportLibrary.services;
 using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,15 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 //  SQLite database зам
 var dbPath = builder.Configuration.GetConnectionString("AirportDb");
 
-//   Repository болон context бүртгэх
-//builder.Services.AddSingleton(new Database(dbPath));
-//builder.Services.AddSingleton<FlightRepository>();
-//builder.Services.AddSingleton<PassengerRepository>();
-//builder.Services.AddSingleton<SeatRepository>();
-
-builder.Services.AddScoped<Database>(_ => new Database(dbPath));
+builder.Services.AddSingleton(new Database(dbPath));
 builder.Services.AddScoped<IPassengerRepository, PassengerRepository>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.AddScoped<FlightService>();
+
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
 
