@@ -31,7 +31,7 @@
             label1 = new Label();
             label2 = new Label();
             PassportNumber = new TextBox();
-            label3 = new Label();
+            lblAssignedSeat = new Label();
             btnSearch = new Button();
             button2 = new Button();
             SuspendLayout();
@@ -62,14 +62,15 @@
             PassportNumber.TabIndex = 2;
             PassportNumber.TextChanged += textBox1_TextChanged;
             // 
-            // label3
+            // lblAssignedSeat
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(275, 194);
-            label3.Name = "label3";
-            label3.Size = new Size(111, 20);
-            label3.TabIndex = 3;
-            label3.Text = "_________________";
+            lblAssignedSeat.AutoSize = true;
+            lblAssignedSeat.Location = new Point(275, 194);
+            lblAssignedSeat.Name = "lblAssignedSeat";
+            lblAssignedSeat.Size = new Size(111, 20);
+            lblAssignedSeat.TabIndex = 3;
+            lblAssignedSeat.Text = "_________________";
+            lblAssignedSeat.Click += label3_Click;
             // 
             // btnSearch
             // 
@@ -79,6 +80,7 @@
             btnSearch.TabIndex = 4;
             btnSearch.Text = "Хайх";
             btnSearch.UseVisualStyleBackColor = true;
+            btnSearch.Click += btnSearch_Click;
             // 
             // button2
             // 
@@ -97,7 +99,7 @@
             ClientSize = new Size(767, 354);
             Controls.Add(button2);
             Controls.Add(btnSearch);
-            Controls.Add(label3);
+            Controls.Add(lblAssignedSeat);
             Controls.Add(PassportNumber);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -113,7 +115,7 @@
         private Label label1;
         private Label label2;
         private TextBox PassportNumber;
-        private Label label3;
+        private Label lblAssignedSeat;
         private Button btnSearch;
         private Button button2;
     }

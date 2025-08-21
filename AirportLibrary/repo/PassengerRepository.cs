@@ -23,7 +23,7 @@ namespace AirportLibrary.repo
         {
             using var conn = _db.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Passengers WHERE PassportNo = @passportNo";
+            cmd.CommandText = "SELECT * FROM Passenger WHERE PassportNo = @passportNo";
             cmd.Parameters.AddWithValue("@passportNo", passportNo);
 
             using var reader = cmd.ExecuteReader();

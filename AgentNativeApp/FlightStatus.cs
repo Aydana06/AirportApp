@@ -22,8 +22,8 @@ namespace AgentNativeApp
 
         private void button4_Click(object sender, EventArgs e)
         {
-            Seat seat = new Seat();
-            seat.ShowDialog();
+            //Seat seat = new Seat();
+            //seat.ShowDialog();
         }
 
         private void Passenger_Load(object sender, EventArgs e)

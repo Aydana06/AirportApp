@@ -13,6 +13,7 @@ builder.Services.AddSingleton(new Database(dbPath));
 builder.Services.AddScoped<IPassengerRepository, PassengerRepository>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 builder.Services.AddScoped<FlightService>();
+builder.Services.AddScoped<PassengerService>();
 
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 

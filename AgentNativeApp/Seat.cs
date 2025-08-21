@@ -1,5 +1,6 @@
 ﻿using AirportLibrary.model;
-using Microsoft.Data.Sqlite;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,94 +15,53 @@ namespace AgentNativeApp
 {
     public partial class Seat : Form
     {
-        private List<Flight> flights = new List<Flight>();
-        private List<AirportLibrary.model.Seat> seats = new List<AirportLibrary.model.Seat>();
-        private string connectionString = "Data Source=C:\\Users\\Lenovo\\Documents\\3th_COURSE\\AirportApp\\Airport-API\\airport.db";
-
+        private readonly string _passport;
+        private readonly HttpClient _http = new();
+        private List<Flight> flights = new();
+        private List<AirportLibrary.model.Seat> seats = new();
         private Flight currentFlight = null;
 
-        public Seat()
+        public Seat(string passport)
         {
+            _passport = passport;
             InitializeComponent();
         }
 
         private void label1_Click(object sender, EventArgs e)
-        {
-
-
-        }
-
+        { }
         private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        { }
         private void btnChangeStatus_Click(object sender, EventArgs e)
         { }
-
         private void button2_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        { }
         private void Seat_Load(object sender, EventArgs e)
         {
+            lblPassport.Text = _passport;
             LoadFlights();
             GenerateFlights();
         }
-        private void LoadFlights()
+
+        private async void LoadFlights()
         {
-            flights.Clear();
-
-            using (var conn = new SqliteConnection(connectionString))
-            {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, FlightCode, Status FROM Flights";
-
-                using (var reader = cmd.ExecuteReader()) {
-                    while (reader.Read()) {
-                        flights.Add(new Flight
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FlightCode = reader.GetString(reader.GetOrdinal("FlightCode")),
-                            Status = reader.GetString(reader.GetOrdinal("Status"))
-                        });
-                    }
-                }
-            }
+            await LoadFlightsAsync();
+        }
+        // API-аас Flight авах
+        private async Task LoadFlightsAsync()
+        {
+            flights = await _http.GetFromJsonAsync<List<Flight>>("https://localhost:7221/api/Flight") ?? new List<Flight>();
         }
 
-        private void LoadSeats(int flightId)
+        // API-аас Seats авах
+        private async Task LoadSeatsAsync(int flightId)
         {
-            seats.Clear();
-            using (var conn = new SqliteConnection(connectionString)) {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, SeatNo, FlightId, isTaken FROM Seat WHERE FlightId=@fid";
-                cmd.Parameters.AddWithValue("@fid", flightId);
-
-                using (var reader = cmd.ExecuteReader()) {
-                    while (reader.Read()) {
-                        seats.Add(new AirportLibrary.model.Seat
-                        {
-                            Id = reader.GetInt32(0),
-                            SeatNo = reader.GetString(1),
-                            FlightId = reader.GetInt32(2),
-                            isTaken = reader.GetInt32(3) == 1
-
-                        });
-                    }
-                }
-            }
-
-
+            seats = await _http.GetFromJsonAsync<List<AirportLibrary.model.Seat>>($"https://localhost:7221/api/Flight/{flightId}/Seats") ?? new List<AirportLibrary.model.Seat>();
         }
         private void GenerateFlights()
         {
             int startX = 130;
             int startY = 30;
-            int btnWidth = 70; 
+            int btnWidth = 70;
             int btnHeight = 30;
             int margin = 10;
             int col = 0;
@@ -121,14 +81,14 @@ namespace AgentNativeApp
                 col++;
             }
         }
-        private void FlightBtn_Click(object sender, EventArgs e)
+        private async void FlightBtn_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button; 
-            if (btn == null) return; 
-            currentFlight = btn.Tag as Flight; 
-            if (currentFlight == null) return; 
-            ClearSeats(); 
-            LoadSeats(currentFlight.Id); 
+            if (sender is not Button btn) return;
+            currentFlight = btn.Tag as Flight;
+            if (currentFlight == null) return;
+
+            ClearSeats();
+            await LoadSeatsAsync(currentFlight.Id);
             GenerateSeats();
         }
 
@@ -137,7 +97,7 @@ namespace AgentNativeApp
             var removeList = new List<Control>();
             foreach (Control ctrl in this.Controls)
             {
-                if (ctrl is Button seatBtn && seatBtn.Tag != null && seatBtn.Tag.ToString().StartsWith("seat_"))
+                if (ctrl is Button seatBtn && seatBtn.Tag is AirportLibrary.model.Seat)
                 {
                     removeList.Add(ctrl);
                 }
@@ -152,8 +112,8 @@ namespace AgentNativeApp
 
         private void GenerateSeats()
         {
-            int startX = 35; 
-            int startY = 130; 
+            int startX = 35;
+            int startY = 130;
             int btnWidth = 50;
             int btnHeight = 40;
             int margin = 10;
@@ -187,29 +147,43 @@ namespace AgentNativeApp
             }
         }
 
-        private void SeatBtn_Click(object sender, EventArgs e)
+        private async void SeatBtn_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
+            if (sender is not Button btn) return;
             var seat = btn.Tag as AirportLibrary.model.Seat;
-            if (seat == null) return;
+            if (seat == null || currentFlight == null) return;
 
-            seat.isTaken = !seat.isTaken;
-            btn.BackColor = seat.isTaken ? Color.Red : Color.LightGreen;
-
-            using (var conn = new SqliteConnection(connectionString))
+            // Суудал захиалах хүсэлт үүсгэх
+            var checkInRequest = new
             {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "UPDATE Seat SET isTaken=@taken WHERE Id=@id";
-            cmd.Parameters.AddWithValue("@id", seat.Id);
-            cmd.Parameters.AddWithValue("@taken", seat.isTaken ? 1 : 0);
-            cmd.ExecuteNonQuery();
+                passportNo = _passport,
+                seatNo = seat.SeatNo,
+                flightId = currentFlight.Id
+            };
+
+            var response = await _http.PostAsJsonAsync("https://localhost:7221/api/CheckIn", checkInRequest);
+
+            if (response.IsSuccessStatusCode)
+            {
+                seat.isTaken = true;
+                btn.BackColor = Color.Red;
+                MessageBox.Show($"Суудал {seat.SeatNo} амжилттай оноосон!");
             }
+            else
+            {
+                MessageBox.Show("Суудал оноох үед алдаа гарлаа!");
+            }
+
         }
 
-        private void btnSeat_Click(object sender, EventArgs e)
-        {
+        //private void btnSeat_Click(object sender, EventArgs e)
+        //{
 
+        //}
+
+        private void btnSeat_Click_1(object sender, EventArgs e)
+        {
+            //Суудал оноох 
         }
     }
 }

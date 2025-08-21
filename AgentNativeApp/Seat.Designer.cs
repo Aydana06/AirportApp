@@ -19,6 +19,7 @@
             }
             base.Dispose(disposing);
         }
+        
 
         #region Windows Form Designer generated code
 
@@ -31,12 +32,14 @@
             label2 = new Label();
             label3 = new Label();
             btnSeat = new Button();
+            label1 = new Label();
+            lblPassport = new Label();
             SuspendLayout();
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(32, 89);
+            label2.Location = new Point(48, 129);
             label2.Name = "label2";
             label2.Size = new Size(81, 20);
             label2.TabIndex = 4;
@@ -45,7 +48,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(32, 34);
+            label3.Location = new Point(48, 76);
             label3.Name = "label3";
             label3.Size = new Size(82, 20);
             label3.TabIndex = 5;
@@ -53,18 +56,38 @@
             // 
             // btnSeat
             // 
-            btnSeat.Location = new Point(551, 431);
+            btnSeat.Location = new Point(567, 471);
             btnSeat.Name = "btnSeat";
             btnSeat.Size = new Size(134, 29);
             btnSeat.TabIndex = 7;
             btnSeat.Text = "Суудал оноох";
             btnSeat.UseVisualStyleBackColor = true;
+            btnSeat.Click += btnSeat_Click_1;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(48, 26);
+            label1.Name = "label1";
+            label1.Size = new Size(148, 20);
+            label1.TabIndex = 8;
+            label1.Text = "Пасспортын дугаар:";
+            // 
+            // lblPassport
+            // 
+            lblPassport.AutoSize = true;
+            lblPassport.Location = new Point(225, 26);
+            lblPassport.Name = "lblPassport";
+            lblPassport.Size = new Size(0, 20);
+            lblPassport.TabIndex = 9;
             // 
             // Seat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(713, 472);
+            ClientSize = new Size(713, 512);
+            Controls.Add(lblPassport);
+            Controls.Add(label1);
             Controls.Add(btnSeat);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -79,5 +102,7 @@
         private Label label2;
         private Label label3;
         private Button btnSeat;
+        private Label label1;
+        private Label lblPassport;
     }
 }
