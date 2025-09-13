@@ -2,8 +2,6 @@
 using AirportLibrary.model;
 using AirportLibrary.repo;
 using System;
-using System;
-using System.Collections.Generic;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +37,16 @@ namespace Airport.services
         public bool IsSeatAlreadyTaken(int flightId, string seatNo)
         {
             return _seatRepository.IsSeatTaken(flightId, seatNo);
+        }
+
+        /// <summary>
+        /// Нислэгийн бүх суудлуудыг авна (боломжтой болон эзлэгдсэн)
+        /// </summary>
+        /// <param name="flightId"></param>
+        /// <returns></returns>
+        public List<Seat> GetAllSeats(int flightId)
+        {
+            return _seatRepository.GetAllSeats(flightId);
         }
 
         /// <summary>
@@ -80,6 +88,16 @@ namespace Airport.services
         public Seat? GetSeatDetails(string seatNo, int flightId)
         {
             return _seatRepository.GetBySeatNo(seatNo, flightId);
+        }
+
+        /// <summary>
+        /// Нислэгт суудлуудыг автоматаар үүсгэх
+        /// </summary>
+        /// <param name="flightId">Нислэгийн ID</param>
+        /// <param name="totalSeats">Суудлын тоо</param>
+        public void CreateSeatsForFlight(int flightId, int totalSeats)
+        {
+            _seatRepository.CreateSeatsForFlight(flightId, totalSeats);
         }
     }
 }

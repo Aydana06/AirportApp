@@ -16,9 +16,6 @@ namespace AgentNativeApp
             flightStatusForm.Show();
 
             Application.Run(new Passenger());
-
-           
-
         }
     }
 }

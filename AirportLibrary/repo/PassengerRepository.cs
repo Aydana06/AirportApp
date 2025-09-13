@@ -52,7 +52,7 @@ namespace AirportLibrary.repo
             var passengers = new List<Passenger>();
             using var conn = _db.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Passengers WHERE FlightId = @flightId";
+            cmd.CommandText = "SELECT * FROM Passenger WHERE FlightId = @flightId";
             cmd.Parameters.AddWithValue("@flightId", flightId);
 
             using var reader = cmd.ExecuteReader();

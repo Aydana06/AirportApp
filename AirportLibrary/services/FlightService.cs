@@ -5,16 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using AirportLibrary.repo;
 using AirportLibrary.model;
+using Airport.services;
 
 namespace AirportLibrary.services
 {
     public class FlightService
     {
         private readonly IFlightRepository _repository;
+        private readonly SeatService _seatService;
 
-        public FlightService(IFlightRepository repository)
+        public FlightService(IFlightRepository repository, SeatService seatService)
         {
             _repository = repository;
+            _seatService = seatService;
         }
 
         public void UpdateFlightStatus(int flightId, string newStatus)
@@ -60,6 +63,42 @@ namespace AirportLibrary.services
             }
 
             return flight;
+        }
+
+        /// <summary>
+        /// Шинэ нислэг үүсгэх (суудлуудтай хамт)
+        /// </summary>
+        public Flight CreateFlight(string flightCode, string status, int totalSeats = 30)
+        {
+            if (string.IsNullOrWhiteSpace(flightCode))
+                throw new ArgumentException("Flight code хоосон байж болохгүй.");
+
+            if (totalSeats <= 0)
+                throw new ArgumentException("Суудлын тоо 0-ээс их байх ёстой.");
+
+            var flight = new Flight
+            {
+                FlightCode = flightCode,
+                Status = status,
+                TotalSeats = totalSeats,
+                AvailableSeats = totalSeats
+            };
+
+            // Нислэгийг database-д хадгалах
+            _repository.Create(flight);
+
+            // Суудлуудыг автоматаар үүсгэх
+            CreateSeatsForFlight(flight.Id, totalSeats);
+
+            return flight;
+        }
+
+        /// <summary>
+        /// Нислэгт суудлуудыг автоматаар үүсгэх
+        /// </summary>
+        private void CreateSeatsForFlight(int flightId, int totalSeats)
+        {
+            _seatService.CreateSeatsForFlight(flightId, totalSeats);
         }
     }
 

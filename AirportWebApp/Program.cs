@@ -8,6 +8,13 @@
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            
+            // HttpClient нэмэх
+            builder.Services.AddHttpClient("AirportAPI", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7221/");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
 
             var app = builder.Build();
 

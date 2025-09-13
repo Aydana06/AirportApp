@@ -1,4 +1,5 @@
 ﻿using Airport.Api.Hubs;
+using Airport.services;
 using AirportLibrary;
 using AirportLibrary.repo;
 using AirportLibrary.services;
@@ -14,6 +15,7 @@ builder.Services.AddScoped<IPassengerRepository, PassengerRepository>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 builder.Services.AddScoped<FlightService>();
 builder.Services.AddScoped<PassengerService>();
+builder.Services.AddScoped<SeatService>();
 
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 

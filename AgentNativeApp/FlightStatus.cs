@@ -22,13 +22,11 @@ namespace AgentNativeApp
 
         private void button4_Click(object sender, EventArgs e)
         {
-            //Seat seat = new Seat();
-            //seat.ShowDialog();
         }
 
         private void Passenger_Load(object sender, EventArgs e)
         {
-
+            // Form load event handler
         }
 
         private void btnSave_Click(object sender, EventArgs e)

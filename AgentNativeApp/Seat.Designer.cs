@@ -19,7 +19,7 @@
             }
             base.Dispose(disposing);
         }
-        
+
 
         #region Windows Form Designer generated code
 
@@ -30,33 +30,25 @@
         private void InitializeComponent()
         {
             label2 = new Label();
-            label3 = new Label();
             btnSeat = new Button();
             label1 = new Label();
             lblPassport = new Label();
+            SeatPanel = new Panel();
+            lblFlightCode = new Label();
             SuspendLayout();
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(48, 129);
+            label2.Location = new Point(48, 125);
             label2.Name = "label2";
             label2.Size = new Size(81, 20);
             label2.TabIndex = 4;
             label2.Text = "Суудалууд:";
             // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(48, 76);
-            label3.Name = "label3";
-            label3.Size = new Size(82, 20);
-            label3.TabIndex = 5;
-            label3.Text = "Нислэгүүд:";
-            // 
             // btnSeat
             // 
-            btnSeat.Location = new Point(567, 471);
+            btnSeat.Location = new Point(567, 416);
             btnSeat.Name = "btnSeat";
             btnSeat.Size = new Size(134, 29);
             btnSeat.TabIndex = 7;
@@ -81,15 +73,31 @@
             lblPassport.Size = new Size(0, 20);
             lblPassport.TabIndex = 9;
             // 
+            // SeatPanel
+            // 
+            SeatPanel.Location = new Point(48, 171);
+            SeatPanel.Name = "SeatPanel";
+            SeatPanel.Size = new Size(653, 222);
+            SeatPanel.TabIndex = 10;
+            // 
+            // lblFlightCode
+            // 
+            lblFlightCode.AutoSize = true;
+            lblFlightCode.Location = new Point(48, 76);
+            lblFlightCode.Name = "lblFlightCode";
+            lblFlightCode.Size = new Size(0, 20);
+            lblFlightCode.TabIndex = 12;
+            // 
             // Seat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(713, 512);
+            ClientSize = new Size(713, 457);
+            Controls.Add(lblFlightCode);
+            Controls.Add(SeatPanel);
             Controls.Add(lblPassport);
             Controls.Add(label1);
             Controls.Add(btnSeat);
-            Controls.Add(label3);
             Controls.Add(label2);
             Name = "Seat";
             Text = "Seat";
@@ -100,9 +108,10 @@
 
         #endregion
         private Label label2;
-        private Label label3;
         private Button btnSeat;
         private Label label1;
         private Label lblPassport;
+        private Panel SeatPanel;
+        private Label lblFlightCode;
     }
 }

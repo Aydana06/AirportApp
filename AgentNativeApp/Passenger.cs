@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AirportLibrary.model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,7 +17,6 @@ namespace AgentNativeApp
     {
         private readonly HttpClient _http = new();
         private Label lblFlightStatus;
-        private string flightStatus = "Бүртгэж байна";
         public Passenger()
         {
             InitializeComponent();
@@ -43,15 +43,27 @@ namespace AgentNativeApp
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var passport = PassportNumber.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(passport))
+            if (button2.Tag is not PassengerDto passenger)
             {
-                MessageBox.Show("Эхлээд паспортын дугаар хайна уу.");
+                MessageBox.Show("Эхлээд зорчигчийн мэдээллийг шалгана уу.");
                 return;
             }
 
-            Seat seatForm = new Seat(passport);
+            // Аль хэдийн суудал оноогдсон эсэхийг шалгах
+            if (!string.IsNullOrWhiteSpace(passenger.SeatNo))
+            {
+                MessageBox.Show($"Танд {passenger.SeatNo} суудал аль хэдийн оноогдсон байна!");
+                return;
+            }
+
+            // Нислэгийн төлөв "Бүртгэж байна" эсэхийг шалгах
+            if (passenger.FlightStatus != "Бүртгэж байна")
+            {
+                MessageBox.Show($"Нислэгийн төлөв: {passenger.FlightStatus}. Суудал оноох боломжгүй.");
+                return;
+            }
+
+            Seat seatForm = new Seat(passenger);
             seatForm.ShowDialog();
         }
 
@@ -70,11 +82,11 @@ namespace AgentNativeApp
 
             button2.Enabled = false;
 
-            // var passenger = await _http.GetFromJsonAsync<PassengerDto>($"https://localhost:7221/api/Passenger/{passport}");
+            PassengerDto? passenger = null;
 
             try
             {
-                var passenger = await _http.GetFromJsonAsync<PassengerDto>(
+                passenger = await _http.GetFromJsonAsync<PassengerDto>(
                     $"https://localhost:7221/api/Passenger/{passport}");
                 if (passenger == null)
                 {
@@ -84,34 +96,31 @@ namespace AgentNativeApp
 
                 // Нислэгийн төлөв харуулах
                 lblFlightStatus.Visible = true;
-                lblFlightStatus.Text = $"Нислэгийн төлөв: {flightStatus}";
+                lblFlightStatus.Text = $"Нислэгийн төлөв: {passenger?.FlightStatus}";
 
                 // Суудлын мэдээлэл
                 lblAssignedSeat.Text = !string.IsNullOrWhiteSpace(passenger.SeatNo)
                     ? $"Оноосон суудал: {passenger.SeatNo}"
                     : "Оноосон суудал байхгүй";
+
+                button2.Tag = passenger;
+
+                // Зөвхөн "Бүртгэж байна" үед болон суудал оноогдоогүй үед суудал оноох боломжтой болгоно
+                button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
             }
             catch (HttpRequestException ex)
             {
                 MessageBox.Show($"API дуудах үед алдаа гарлаа: {ex.Message}");
+                button2.Enabled = false;
             }
             finally
             {
-                button2.Enabled = true;
+                // Reset button state only if no error occurred
+                if (passenger != null)
+                {
+                    button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
+                }
             }
-
-            //if (passenger == null)
-            //{
-            //    lblAssignedSeat.Text = "Зорчигч олдсонгүй";
-            //    lblFlightStatus.Visible = false;
-            //    return;
-            //}
-
-            //lblFlightStatus.Visible = true;
-            //lblFlightStatus.Text = $"Нислэгийн төлөв: {flightStatus}";
-            //lblAssignedSeat.Text = !string.IsNullOrWhiteSpace(passenger.SeatNo)
-            //    ? $"Оноосон суудал: {passenger.SeatNo}"
-            //    : "Оноосон суудал байхгүй";
         }
 
 
@@ -128,5 +137,6 @@ namespace AgentNativeApp
         public string PassportNo { get; set; } = "";
         public int FlightId { get; set; }
         public string? SeatNo { get; set; }
+        public string FlightStatus { get; set; } = "";
     }
 }

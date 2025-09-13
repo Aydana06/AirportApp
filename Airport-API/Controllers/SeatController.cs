@@ -1,5 +1,4 @@
 ﻿using Airport.services;
-using AirportLibrary.repo;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Airport.Api.Controllers
@@ -16,15 +15,42 @@ namespace Airport.Api.Controllers
         }
 
         /// <summary>
+        /// Нислэгийн бүх суудлуудыг буцаана (боломжтой болон эзлэгдсэн).
+        /// </summary>
+        /// <param name="flightId">Нислэгийн ID</param>
+        /// <returns>Бүх суудлуудын жагсаалт.</returns>
+        [HttpGet("{flightId}")]
+        public IActionResult GetAllSeats(int flightId)
+        {
+            try
+            {
+                var seats = _seatService.GetAllSeats(flightId);
+                return Ok(seats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Алдаа гарлаа: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Нислэгийн үлдэгдэл сул суудлуудыг буцаана.
         /// </summary>
         /// <param name="flightId">Нислэгийн ID</param>
         /// <returns>Сул байгаа суудлуудын жагсаалт.</returns>
-        [HttpGet("{flightId}")]
+        [HttpGet("{flightId}/available")]
         public IActionResult GetAvailableSeats(int flightId)
         {
-            var seats = _seatService.GetAvailableSeats(flightId);
-            return Ok(seats);
+            try
+            {
+                var seats = _seatService.GetAvailableSeats(flightId);
+                return Ok(seats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Алдаа гарлаа: {ex.Message}");
+            }
         }
+
     }
 }

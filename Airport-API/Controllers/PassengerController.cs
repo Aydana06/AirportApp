@@ -9,10 +9,12 @@ namespace Airport.Api.Controllers
     public class PassengerController : ControllerBase
     {
         private readonly PassengerService _passengerService;
+        private readonly FlightService _flightService;
 
-        public PassengerController(PassengerService passengerService)
+        public PassengerController(PassengerService passengerService, FlightService flightService)
         {
             _passengerService = passengerService;
+            _flightService = flightService;
         }
 
         /// <summary>
@@ -27,7 +29,19 @@ namespace Airport.Api.Controllers
             if (passenger == null)
                 return NotFound();
 
-            return Ok(passenger);
+            // Зорчигчийн мэдээлэлтэй хамт нислэгийн төлөвийг буцаах
+            var flight = _flightService.GetFlightById(passenger.FlightId);
+            var result = new
+            {
+                Id = passenger.Id,
+                FullName = passenger.Name,
+                PassportNo = passenger.PassportNo,
+                FlightId = passenger.FlightId,
+                SeatNo = passenger.SeatNo,
+                FlightStatus = flight?.Status ?? "Тодорхойгүй"
+            };
+
+            return Ok(result);
         }
     }
 }

@@ -21,6 +21,13 @@ namespace AirportLibrary.repo
         List<Seat> GetAvailableSeats(int flightId);
 
         /// <summary>
+        /// Нислэгийн бүх суудлуудыг авна (боломжтой болон эзлэгдсэн)
+        /// </summary>
+        /// <param name="flightId"></param>
+        /// <returns></returns>
+        List<Seat> GetAllSeats(int flightId);
+
+        /// <summary>
         /// Нислэгт аль хэдийн тодорхой суудал авсан эсэхийг шалгана.
         /// </summary>
         /// <param name="flightId"></param>
@@ -44,5 +51,12 @@ namespace AirportLibrary.repo
         /// <param name="flightId"></param>
         /// <returns></returns>
         Seat? GetSeatByPassenger(int passengerId, int flightId);
+
+        /// <summary>
+        /// Нислэгт суудлуудыг автоматаар үүсгэх
+        /// </summary>
+        /// <param name="flightId">Нислэгийн ID</param>
+        /// <param name="totalSeats">Суудлын тоо</param>
+        void CreateSeatsForFlight(int flightId, int totalSeats);
     }
 }

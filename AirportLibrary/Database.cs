@@ -1,13 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.IO;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-
 namespace AirportLibrary
 {
     public class Database
@@ -36,7 +29,9 @@ namespace AirportLibrary
                 CREATE TABLE IF NOT EXISTS Flights (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     FlightCode TEXT NOT NULL,
-                    Status TEXT NOT NULL
+                    Status TEXT NOT NULL,
+                    TotalSeats INTEGER NOT NULL DEFAULT 30,
+                    AvailableSeats INTEGER NOT NULL DEFAULT 30
                 );";
                 cmd.ExecuteNonQuery();
 

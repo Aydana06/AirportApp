@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportWebApp", "..\Airport
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airport-API", "..\Airport-API\Airport-API.csproj", "{04696E58-3CE2-4E67-A425-8D095B3F3E03}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWebApp", "..\BlazorWebApp\BlazorWebApp.csproj", "{5AF4940C-CBFC-466E-9AB7-53CA15B0F7DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{04696E58-3CE2-4E67-A425-8D095B3F3E03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04696E58-3CE2-4E67-A425-8D095B3F3E03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04696E58-3CE2-4E67-A425-8D095B3F3E03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AF4940C-CBFC-466E-9AB7-53CA15B0F7DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AF4940C-CBFC-466E-9AB7-53CA15B0F7DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AF4940C-CBFC-466E-9AB7-53CA15B0F7DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AF4940C-CBFC-466E-9AB7-53CA15B0F7DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

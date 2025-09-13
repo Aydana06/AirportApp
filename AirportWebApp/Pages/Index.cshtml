@@ -1,10 +1,58 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Нислэгийн мэдээлэл";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Нислэгийн мэдээлэл</h1>
+    <p>Одоогийн нислэгийн төлөв</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Нислэгийн код</th>
+                    <th>Төлөв</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Flights != null && Model.Flights.Any())
+                {
+                    @foreach (var flight in Model.Flights)
+                    {
+                        <tr>
+                            <td>@flight.FlightCode</td>
+                            <td>
+                                @if (flight.Status == "Бүртгэж байна")
+                                {
+                                    <span class="badge bg-primary">@flight.Status</span>
+                                }
+                                else if (flight.Status == "Онгоцонд сууж байна")
+                                {
+                                    <span class="badge bg-success">@flight.Status</span>
+                                }
+                                else if (flight.Status == "Цуцалсан")
+                                {
+                                    <span class="badge bg-danger">@flight.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@flight.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2" class="text-center">Нислэгийн мэдээлэл олдсонгүй</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
