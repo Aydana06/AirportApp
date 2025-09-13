@@ -30,8 +30,6 @@ namespace AirportLibrary
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     FlightCode TEXT NOT NULL,
                     Status TEXT NOT NULL,
-                    TotalSeats INTEGER NOT NULL DEFAULT 30,
-                    AvailableSeats INTEGER NOT NULL DEFAULT 30
                 );";
                 cmd.ExecuteNonQuery();
 

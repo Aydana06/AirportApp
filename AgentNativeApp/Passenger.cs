@@ -1,27 +1,23 @@
-﻿using AirportLibrary.model;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
+﻿using Airport.services;
+using AirportLibrary.services;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
 namespace AgentNativeApp
 {
     public partial class Passenger : Form
     {
         private readonly HttpClient _http = new();
         private Label lblFlightStatus;
-        public Passenger()
+        private readonly SeatService _seatService;
+        private readonly FlightService _flightService;
+        private readonly PassengerService _passengerService;
+
+        public Passenger(SeatService seatService, FlightService flightService, PassengerService passengerService)
         {
             InitializeComponent();
-
             InitializeLayout();
+            _seatService = seatService;
+            _flightService = flightService;
+            _passengerService = passengerService;
         }
 
         private void InitializeLayout()
@@ -62,9 +58,9 @@ namespace AgentNativeApp
                 MessageBox.Show($"Нислэгийн төлөв: {passenger.FlightStatus}. Суудал оноох боломжгүй.");
                 return;
             }
-
-            Seat seatForm = new Seat(passenger);
-            seatForm.ShowDialog();
+ 
+            Seat seatForm = new Seat(passenger, _seatService, _flightService);
+            seatForm.Show();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -80,19 +76,27 @@ namespace AgentNativeApp
             var passport = PassportNumber.Text.Trim();
             if (string.IsNullOrWhiteSpace(passport)) return;
 
-            button2.Enabled = false;
-
-            PassengerDto? passenger = null;
-
             try
             {
-                passenger = await _http.GetFromJsonAsync<PassengerDto>(
-                    $"https://localhost:7221/api/Passenger/{passport}");
-                if (passenger == null)
+                var passengerEntity = _passengerService.GetPassengerByPassport(passport);
+                if (passengerEntity == null)
                 {
-                    MessageBox.Show("Passenger not found.");
+                    MessageBox.Show("Passenger олдсонгүй.");
+                    button2.Enabled = false;
                     return;
                 }
+
+                var flight = _flightService.GetFlightById(passengerEntity.FlightId);
+                // PassengerDto-д хувиргах
+                var passenger = new PassengerDto
+                {
+                    Id = passengerEntity.Id,
+                    FullName = passengerEntity.Name,
+                    PassportNo = passengerEntity.PassportNo,
+                    FlightId = passengerEntity.FlightId,
+                    SeatNo = passengerEntity.SeatNo,
+                    FlightStatus = flight?.Status ?? "Unknown"
+                };
 
                 // Нислэгийн төлөв харуулах
                 lblFlightStatus.Visible = true;
@@ -104,31 +108,15 @@ namespace AgentNativeApp
                     : "Оноосон суудал байхгүй";
 
                 button2.Tag = passenger;
-
-                // Зөвхөн "Бүртгэж байна" үед болон суудал оноогдоогүй үед суудал оноох боломжтой болгоно
-                button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
             }
             catch (HttpRequestException ex)
             {
-                MessageBox.Show($"API дуудах үед алдаа гарлаа: {ex.Message}");
+                MessageBox.Show($"Өгөгдөл татах үед алдаа гарлаа: {ex.Message}");
                 button2.Enabled = false;
             }
-            finally
-            {
-                // Reset button state only if no error occurred
-                if (passenger != null)
-                {
-                    button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
-                }
-            }
         }
-
-
-
         private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
+        {  }
     }
     public class PassengerDto
     {

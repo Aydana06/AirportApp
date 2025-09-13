@@ -1,33 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Net.WebRequestMethods;
+﻿using AirportLibrary.services;
 
 namespace AgentNativeApp
 {
     public partial class FlightStatus : Form
     {
-        private readonly HttpClient _http = new();
-        public FlightStatus()
+        private readonly FlightService _flightService;
+        public FlightStatus(FlightService flightService)
         {
             InitializeComponent();
+            _flightService = flightService;
         }
 
         private void button4_Click(object sender, EventArgs e)
-        {
-        }
+        { }
 
         private void Passenger_Load(object sender, EventArgs e)
-        {
-            // Form load event handler
-        }
+        {  }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -41,7 +29,7 @@ namespace AgentNativeApp
             {
                 MessageBox.Show("Нислэгийн код хоосон байна.");
                 return;
-            }
+            }   
 
             string status = StatusBox.SelectedItem?.ToString() ?? "";
             if (string.IsNullOrWhiteSpace(status))
@@ -50,20 +38,23 @@ namespace AgentNativeApp
                 return;
             }
 
-            var request = new
+            try
             {
-                FlightCode = FlightCode.Text.Trim(),
-                Status = status
-            };
+                var flight = _flightService.GetFlightByCode(flightCode);
+                if(flight == null)
+                {
+                    MessageBox.Show($"Flight {flightCode} олдсонгүй.");
+                    return;
+                }
 
-            var response = await _http.PutAsync("https://localhost:7221/api/Flight/UpdateStatus",
-                new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
+                _flightService.UpdateFlightStatus(flight.Id, status);
 
-            var msg = await response.Content.ReadAsStringAsync();
-            lblStatus.Text = response.IsSuccessStatusCode
-                ? "✅ Амжилттай шинэчлэгдлээ."
-                : "❌ Алдаа гарлаа: " + msg;
-
+                lblStatus.Text = "✅ Амжилттай шинэчлэгдлээ.";
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "❌ Алдаа гарлаа: " + ex.Message;
+            }
         }
     }
 }

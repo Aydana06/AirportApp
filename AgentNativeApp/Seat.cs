@@ -1,5 +1,7 @@
 ﻿using Airport.CheckUI;
+using Airport.services;
 using AirportLibrary.model;
+using AirportLibrary.services;
 using System.Data;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -10,6 +12,8 @@ namespace AgentNativeApp
     public partial class Seat : Form
     {
         private readonly PassengerDto _passenger;
+        private readonly SeatService _seatService;
+        private readonly FlightService _flightService;
         private readonly HttpClient _http = new();
         private List<AirportLibrary.model.Seat> seats = new();
         private Flight currentFlight = null;
@@ -19,33 +23,25 @@ namespace AgentNativeApp
         private string? lastSelectedBtnText = null;
         private Color lastSelectedBtnColor;
 
-        public Seat(PassengerDto passenger)
+        public Seat(PassengerDto passenger, SeatService seatService, FlightService flightService)
         {
             _passenger = passenger;
+            _seatService = seatService;
+            _flightService = flightService;
 
-            var handler = new HttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
-
-            _http = new HttpClient(handler)
-            {
-                BaseAddress = new Uri("https://localhost:7221/"),
-                DefaultRequestVersion = new Version(1, 1),
-                DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-            };
             InitializeComponent();
 
             SeatPanel.AutoScroll = true;
         }
 
         private void label1_Click(object sender, EventArgs e)
-        {}
+        { }
         private void button1_Click(object sender, EventArgs e)
         { }
         private void btnChangeStatus_Click(object sender, EventArgs e)
         { }
         private void button2_Click(object sender, EventArgs e)
-        {}
+        { }
 
         private async void Seat_Load(object sender, EventArgs e)
         {
@@ -60,14 +56,13 @@ namespace AgentNativeApp
 
             ClearSeats();
 
-            var flight = await _http.GetFromJsonAsync<Flight>($"https://localhost:7221/api/Flight/{_passenger.FlightId}");
+            var flight = _flightService.GetFlightById(_passenger.FlightId);
             if (flight != null)
             {
                 currentFlight = flight;
                 lblFlightCode.Text = $"Нислэг: {flight.FlightCode}";
                 await LoadSeats(flight.Id);
             }
-
         }
 
         // API-аас Seats авах
@@ -75,31 +70,15 @@ namespace AgentNativeApp
         {
             try
             {
-                var resp = await _http.GetAsync($"api/Seat/{flightId}");
-                if (!resp.IsSuccessStatusCode)
-                {
-                    var body = await resp.Content.ReadAsStringAsync();
-                    MessageBox.Show($"API алдаа: {(int)resp.StatusCode} {resp.ReasonPhrase}\n{body}");
-                    seats = new List<AirportLibrary.model.Seat>();
-                    ClearSeats();
-                    return;
-                }
-
-                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                seats = await resp.Content.ReadFromJsonAsync<List<AirportLibrary.model.Seat>>(opts) ?? new List<AirportLibrary.model.Seat>();
+                seats = _seatService.GetAllSeats(flightId);
+                GenerateSeats();
             }
-            catch (HttpRequestException ex)
-            {
-                MessageBox.Show($"Суудлын мэдээлэл авахад алдаа гарлаа: {ex.Message}");
-                seats = new List<AirportLibrary.model.Seat>();
-            }   
             catch (Exception ex)
             {
-                MessageBox.Show($"Ерөнхий алдаа: {ex.Message}");
+                MessageBox.Show($"Суудал татахад алдаа: {ex.Message}");
                 seats = new List<AirportLibrary.model.Seat>();
+                ClearSeats();
             }
-
-            GenerateSeats();
         }
 
         private void ClearSeats()
@@ -160,7 +139,7 @@ namespace AgentNativeApp
 
                         if (seat.isTaken)
                         {
-                            seatBtn.BackColor = Color.LightCoral; 
+                            seatBtn.BackColor = Color.LightCoral;
                             seatBtn.Enabled = false;
                         }
                         else
@@ -251,45 +230,39 @@ namespace AgentNativeApp
 
             try
             {
-                var response = await _http.PostAsJsonAsync("api/CheckIn", checkInRequest);
-                if (response.IsSuccessStatusCode)
+                bool success = _seatService.AssignSeat(_passenger.Id, selectedSeat.SeatNo, currentFlight.Id);
+                if (success)
                 {
                     selectedSeat.isTaken = true;
                     _passenger.SeatNo = selectedSeat.SeatNo;
 
                     MessageBox.Show($"Суудал {selectedSeat.SeatNo} амжилттай оноогдлоо!");
 
-                    // Boarding pass үүсгэх
                     var bpPrinter = new BoardingPassPrint(
                         _passenger.PassportNo,
                         selectedSeat.SeatNo,
                         currentFlight.FlightCode,
                         _passenger.FullName
                     );
-
                     bpPrinter.Print();
 
                     await LoadSeats(currentFlight.Id);
-
                     btnSeat.Enabled = false;
                     Close();
                 }
                 else
                 {
-                    var err = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Суудал оноох үед алдаа гарлаа: {err}");
-
-                    if (currentFlight != null) await LoadSeats(currentFlight.Id);
+                    MessageBox.Show($"Суудал {selectedSeat.SeatNo} аль хэдийн эзлэгдсэн байна!");
+                    LoadSeats(currentFlight.Id);
                 }
-            }
-            catch (HttpRequestException ex)
-            {
-                MessageBox.Show($"HTTP алдаа: {ex.Message}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ерөнхий алдаа: {ex.Message}");
+                MessageBox.Show($"Суудал оноох үед алдаа гарлаа: {ex.Message}");
             }
         }
+
+        private void SeatPanel_Paint(object sender, PaintEventArgs e)
+        { }
     }
 }

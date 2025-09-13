@@ -24,7 +24,7 @@ namespace AirportLibrary.repo
             var flights = new List<Flight>();
             using var conn = _db.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, FlightCode, Status, TotalSeats, AvailableSeats FROM Flights";
+            cmd.CommandText = "SELECT Id, FlightCode, Status FROM Flights";
             
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -34,8 +34,6 @@ namespace AirportLibrary.repo
                     Id = reader.GetInt32(0),
                     FlightCode = reader.GetString(1),
                     Status = reader.GetString(2),
-                    TotalSeats = reader.GetInt32(3),
-                    AvailableSeats = reader.GetInt32(4)
                 });
 
             }
@@ -52,7 +50,7 @@ namespace AirportLibrary.repo
         {
             using var conn =_db.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, FlightCode, Status, TotalSeats, AvailableSeats FROM Flights WHERE Id = @id";
+            cmd.CommandText = "SELECT Id, FlightCode, Status FROM Flights WHERE Id = @id";
             cmd.Parameters.AddWithValue("@id", id);
 
             using var reader = cmd.ExecuteReader();
@@ -62,8 +60,6 @@ namespace AirportLibrary.repo
                     Id = reader.GetInt32(0),
                     FlightCode = reader.GetString(1),
                     Status = reader.GetString(2),
-                    TotalSeats = reader.GetInt32(3),
-                    AvailableSeats = reader.GetInt32(4)
                 };
             }
             return null;
@@ -92,7 +88,7 @@ namespace AirportLibrary.repo
         {
             using var conn = _db.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, FlightCode, Status, TotalSeats, AvailableSeats FROM Flights WHERE FlightCode=@flightCode";
+            cmd.CommandText = "SELECT Id, FlightCode, Status FROM Flights WHERE FlightCode=@flightCode";
             cmd.Parameters.AddWithValue("@flightCode", flightCode);
             using var reader = cmd.ExecuteReader();
 
@@ -101,35 +97,10 @@ namespace AirportLibrary.repo
                 {
                     Id = reader.GetInt32(0),
                     FlightCode = reader.GetString(1),
-                    Status = reader.GetString(2),
-                    TotalSeats = reader.GetInt32(3),
-                    AvailableSeats = reader.GetInt32(4)
+                    Status = reader.GetString(2),   
                 };
             }
             return null;
-        }
-
-        /// <summary>
-        /// Шинэ нислэг үүсгэх.
-        /// </summary>
-        /// <param name="flight">Үүсгэх нислэгийн мэдээлэл.</param>
-        /// <returns>Үүсгэгдсэн нислэгийн ID.</returns>
-        public int Create(Flight flight)
-        {
-            using var conn = _db.CreateConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT INTO Flights (FlightCode, Status, TotalSeats, AvailableSeats) 
-                VALUES (@flightCode, @status, @totalSeats, @availableSeats);
-                SELECT last_insert_rowid();";
-            
-            cmd.Parameters.AddWithValue("@flightCode", flight.FlightCode);
-            cmd.Parameters.AddWithValue("@status", flight.Status);
-            cmd.Parameters.AddWithValue("@totalSeats", flight.TotalSeats);
-            cmd.Parameters.AddWithValue("@availableSeats", flight.AvailableSeats);
-
-            var result = cmd.ExecuteScalar();
-            return Convert.ToInt32(result);
         }
     }
 }

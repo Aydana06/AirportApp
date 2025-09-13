@@ -89,16 +89,6 @@ namespace Airport.services
         {
             return _seatRepository.GetBySeatNo(seatNo, flightId);
         }
-
-        /// <summary>
-        /// Нислэгт суудлуудыг автоматаар үүсгэх
-        /// </summary>
-        /// <param name="flightId">Нислэгийн ID</param>
-        /// <param name="totalSeats">Суудлын тоо</param>
-        public void CreateSeatsForFlight(int flightId, int totalSeats)
-        {
-            _seatRepository.CreateSeatsForFlight(flightId, totalSeats);
-        }
     }
 }
 

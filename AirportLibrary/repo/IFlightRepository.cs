@@ -33,12 +33,5 @@ namespace AirportLibrary.repo
         /// <param name="flightCode">Нислэгийн код.</param>
         /// <returns>Хэрэв олдвол <see cref="Flight"/> объект; үгүй бол <c>null</c>.</returns>
         Flight? GetByCode(string flightCode);
-
-        /// <summary>
-        /// Шинэ нислэг үүсгэх.
-        /// </summary>
-        /// <param name="flight">Үүсгэх нислэгийн мэдээлэл.</param>
-        /// <returns>Үүсгэгдсэн нислэгийн ID.</returns>
-        int Create(Flight flight);
     }
 }

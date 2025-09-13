@@ -51,12 +51,5 @@ namespace AirportLibrary.repo
         /// <param name="flightId"></param>
         /// <returns></returns>
         Seat? GetSeatByPassenger(int passengerId, int flightId);
-
-        /// <summary>
-        /// Нислэгт суудлуудыг автоматаар үүсгэх
-        /// </summary>
-        /// <param name="flightId">Нислэгийн ID</param>
-        /// <param name="totalSeats">Суудлын тоо</param>
-        void CreateSeatsForFlight(int flightId, int totalSeats);
     }
 }

@@ -8,7 +8,6 @@ namespace Airport.Api.Hubs
     /// </summary>
     public class SeatHub : Hub
     {
-        // Тусгай method шаардлагагүй —
         // суудал бүртгэгдэх үед CheckInController-оос broadcast хийнэ.
     }
 }

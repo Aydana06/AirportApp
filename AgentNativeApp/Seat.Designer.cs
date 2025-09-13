@@ -79,6 +79,7 @@
             SeatPanel.Name = "SeatPanel";
             SeatPanel.Size = new Size(653, 222);
             SeatPanel.TabIndex = 10;
+            SeatPanel.Paint += SeatPanel_Paint;
             // 
             // lblFlightCode
             // 

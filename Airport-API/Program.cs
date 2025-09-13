@@ -19,8 +19,6 @@ builder.Services.AddScoped<SeatService>();
 
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
-
-
 //   Controller, Swagger, SignalR, CORS
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -32,15 +30,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        //policy.WithOrigins("https://localhost:7171") // Blazor WebApp порт
-        //      .AllowAnyHeader()
-        //      .AllowAnyMethod()
-        //      .AllowCredentials(); //  SignalR-д заавал байх ёстой
        policy.WithOrigins("https://localhost:7171", "http://localhost:7171")
       .AllowAnyHeader()
       .AllowAnyMethod()
       .AllowCredentials();
-
     });
 });
 
