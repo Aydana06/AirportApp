@@ -23,7 +23,6 @@ namespace AirportLibrary.services
 
             flight.Status = newStatus;
             _repository.Update(flight);
-
         }
 
         public List<Flight> ListAllFlights()
@@ -51,7 +50,6 @@ namespace AirportLibrary.services
 
             if (flight == null)
             {
-                // энд алдаа хаяж болно эсвэл null буцааж болно
                 Console.WriteLine($"Flight {flightCode} олдсонгүй.");
                 return null;
             }
@@ -59,5 +57,4 @@ namespace AirportLibrary.services
             return flight;
         }
     }
-
 }
