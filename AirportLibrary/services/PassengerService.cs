@@ -6,10 +6,12 @@ namespace AirportLibrary.services
     public class PassengerService
     {
         private readonly IPassengerRepository _repo;
+        private readonly FlightService _flightService;
 
-        public PassengerService(IPassengerRepository repo)
+        public PassengerService(IPassengerRepository repo, FlightService flightService)
         {
             _repo = repo;
+            _flightService = flightService;
         }
 
         /// <summary>
@@ -41,5 +43,20 @@ namespace AirportLibrary.services
             return _repo.GetByPassport(passportNo) != null;
         }
 
+        public PassengerDto? GetPassengerDtoByPassport(string passport)
+        {
+            var p = _repo.GetByPassport(passport);
+            if (p == null) return null;
+            var flight = _flightService.GetFlightById(p.FlightId);
+            return new PassengerDto
+            {
+                Id = p.Id,
+                FullName = p.Name,
+                PassportNo = p.PassportNo,
+                FlightId = p.FlightId,
+                SeatNo = p.SeatNo,
+                FlightStatus = flight?.Status ?? "Unknown"
+            };
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace AgentNativeApp
             // Service-ууд
             var seatService = new SeatService(seatRepo);
             var flightService = new FlightService(flightRepo);
-            var passengerService = new PassengerService(passengerRepo);
+            var passengerService = new PassengerService(passengerRepo, flightService);
  
             var flightStatusForm = new FlightStatus(flightService);
 

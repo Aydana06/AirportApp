@@ -3,8 +3,6 @@ using Airport.services;
 using AirportLibrary.model;
 using AirportLibrary.services;
 using System.Data;
-using System.Net.Http.Json;
-using System.Text.Json;
 using Button = System.Windows.Forms.Button;
 
 namespace AgentNativeApp
@@ -14,7 +12,6 @@ namespace AgentNativeApp
         private readonly PassengerDto _passenger;
         private readonly SeatService _seatService;
         private readonly FlightService _flightService;
-        private readonly HttpClient _http = new();
         private List<AirportLibrary.model.Seat> seats = new();
         private Flight currentFlight = null;
         private AirportLibrary.model.Seat? selectedSeat = null;
@@ -49,6 +46,13 @@ namespace AgentNativeApp
 
             if (!string.IsNullOrWhiteSpace(_passenger.SeatNo))
             {
+                var bpPrinter = new BoardingPassPrint(
+           _passenger.PassportNo,
+           _passenger.SeatNo,
+           currentFlight?.FlightCode ?? "Unknown",
+           _passenger.FullName
+       );
+                bpPrinter.Print();
                 MessageBox.Show($"Танд {_passenger.SeatNo} суудал аль хэдийн оноогдсон байна!");
                 Close();
                 return;
@@ -220,13 +224,6 @@ namespace AgentNativeApp
                 MessageBox.Show("Эхлээд суудал болон нислэгийг сонгоно уу.");
                 return;
             }
-
-            var checkInRequest = new
-            {
-                passportNo = _passenger.PassportNo,
-                seatNo = selectedSeat.SeatNo,
-                flightId = currentFlight.Id
-            };
 
             try
             {

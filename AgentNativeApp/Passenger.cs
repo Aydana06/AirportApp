@@ -1,11 +1,11 @@
 ﻿using Airport.services;
+using AirportLibrary.model;
 using AirportLibrary.services;
 using System.Net.Http.Json;
 namespace AgentNativeApp
 {
     public partial class Passenger : Form
     {
-        private readonly HttpClient _http = new();
         private Label lblFlightStatus;
         private readonly SeatService _seatService;
         private readonly FlightService _flightService;
@@ -31,7 +31,6 @@ namespace AgentNativeApp
                 Visible = false
             };
             Controls.Add(lblFlightStatus);
-
         }
 
         private void Passenger_Load(object sender, EventArgs e)
@@ -58,8 +57,8 @@ namespace AgentNativeApp
                 MessageBox.Show($"Нислэгийн төлөв: {passenger.FlightStatus}. Суудал оноох боломжгүй.");
                 return;
             }
- 
-            Seat seatForm = new Seat(passenger, _seatService, _flightService);
+
+            var seatForm = new Seat(passenger, _seatService, _flightService);
             seatForm.Show();
         }
 
@@ -68,10 +67,10 @@ namespace AgentNativeApp
 
         private void btnSearch_Click(object? sender, EventArgs e)
         {
-            PassportNumber_Leave(sender, EventArgs.Empty);
+            LoadPassengerByPassport(sender, EventArgs.Empty);
         }
 
-        private async void PassportNumber_Leave(object? sender, EventArgs e)
+        private async void LoadPassengerByPassport(object? sender, EventArgs e)
         {
             var passport = PassportNumber.Text.Trim();
             if (string.IsNullOrWhiteSpace(passport)) return;
@@ -87,16 +86,14 @@ namespace AgentNativeApp
                 }
 
                 var flight = _flightService.GetFlightById(passengerEntity.FlightId);
-                // PassengerDto-д хувиргах
-                var passenger = new PassengerDto
+
+                var passenger = _passengerService.GetPassengerDtoByPassport(passport);
+                if (passenger == null)
                 {
-                    Id = passengerEntity.Id,
-                    FullName = passengerEntity.Name,
-                    PassportNo = passengerEntity.PassportNo,
-                    FlightId = passengerEntity.FlightId,
-                    SeatNo = passengerEntity.SeatNo,
-                    FlightStatus = flight?.Status ?? "Unknown"
-                };
+                    MessageBox.Show("Passenger олдсонгүй.");
+                    button2.Enabled = false;
+                    return;
+                }
 
                 // Нислэгийн төлөв харуулах
                 lblFlightStatus.Visible = true;
@@ -117,14 +114,5 @@ namespace AgentNativeApp
         }
         private void label3_Click(object sender, EventArgs e)
         {  }
-    }
-    public class PassengerDto
-    {
-        public int Id { get; set; }
-        public string FullName { get; set; } = "";
-        public string PassportNo { get; set; } = "";
-        public int FlightId { get; set; }
-        public string? SeatNo { get; set; }
-        public string FlightStatus { get; set; } = "";
     }
 }

@@ -10,12 +10,13 @@ namespace AirportTest
     {
         private Mock<IPassengerRepository> _mockRepo;
         private PassengerService _service;
+        private FlightService _flightService;
 
         [TestInitialize]
         public void Setup()
         {
             _mockRepo = new Mock<IPassengerRepository>();
-            _service = new PassengerService(_mockRepo.Object);
+            _service = new PassengerService(_mockRepo.Object, _flightService);
         }
 
         [TestMethod]
