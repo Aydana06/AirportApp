@@ -1,5 +1,9 @@
 ﻿using AirportLibrary.repo;
 using AirportLibrary.model;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using AirportLibrary.model;
 
 namespace AirportLibrary.services
 {
@@ -39,7 +43,8 @@ namespace AirportLibrary.services
         /// </summary>
         /// <param name="passportNo">Шалгах паспортын дугаар.</param>
         /// <returns>xэрэв зорчигч байгаа бол <c>true</c>; үгүй бол <c>false</c>.</returns>
-        public bool IsPassengerRegistered(string passportNo) {
+        public bool IsPassengerRegistered(string passportNo)
+        {
             return _repo.GetByPassport(passportNo) != null;
         }
 
@@ -58,5 +63,26 @@ namespace AirportLibrary.services
                 FlightStatus = flight?.Status ?? "Unknown"
             };
         }
+        ///// <summary>
+        ///// Паспортын дугаараар зорчигчийг API-аас авна.
+        ///// </summary>
+        //public async Task<PassengerDto?> GetPassengerDtoByPassportAsync(string passport)
+        //{
+        //    try
+        //    {
+        //        // API endpoint руу GET request илгээх
+        //        var response = await _http.GetAsync($"api/passenger/{passport}");
+        //        if (!response.IsSuccessStatusCode)
+        //            return null;
+
+        //        var passenger = await response.Content.ReadFromJsonAsync<PassengerDto>();
+        //        return passenger;
+        //    }
+        //    catch (HttpRequestException)
+        //    {
+        //        return null;
+        //    }
+        //}
     }
 }
+

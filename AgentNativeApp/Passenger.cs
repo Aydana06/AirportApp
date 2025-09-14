@@ -1,23 +1,26 @@
-﻿using Airport.services;
+﻿using Airport.CheckUI;
+using Airport.services;
 using AirportLibrary.model;
 using AirportLibrary.services;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 namespace AgentNativeApp
 {
     public partial class Passenger : Form
     {
         private Label lblFlightStatus;
         private readonly SeatService _seatService;
-        private readonly FlightService _flightService;
-        private readonly PassengerService _passengerService;
 
-        public Passenger(SeatService seatService, FlightService flightService, PassengerService passengerService)
+        private readonly HttpClient _http = new();
+        private Button btnPrintBP;
+        private PassengerDto? _passenger;
+        private Flight? currentFlight;
+
+        public Passenger(SeatService seatService)
         {
             InitializeComponent();
             InitializeLayout();
-            _seatService = seatService;
-            _flightService = flightService;
-            _passengerService = passengerService;
+            _seatService = seatService; 
         }
 
         private void InitializeLayout()
@@ -31,6 +34,35 @@ namespace AgentNativeApp
                 Visible = false
             };
             Controls.Add(lblFlightStatus);
+
+            btnPrintBP = new Button
+            {
+                Text = "Print Boarding Pass",
+                Location = new Point(20, 50),
+                Size = new Size(150, 30),
+                Enabled = false // Эхэндээ идэвхгүй
+            };
+            btnPrintBP.Click += BtnPrintBP_Click;
+            Controls.Add(btnPrintBP);
+        }
+
+        private void BtnPrintBP_Click(object sender, EventArgs e)
+        {
+            if (_passenger == null || string.IsNullOrWhiteSpace(_passenger.SeatNo) || currentFlight == null)
+            {
+                MessageBox.Show("Суудал болон нислэгийг зөв сонгоно уу.");
+                return;
+            }
+
+            var bpPrinter = new BoardingPassPrint(
+                _passenger.PassportNo,
+                _passenger.SeatNo,
+                currentFlight.FlightCode,
+                _passenger.FullName
+            );
+
+            bpPrinter.Print();
+            MessageBox.Show("Boarding pass хэвлэгдлээ!");
         }
 
         private void Passenger_Load(object sender, EventArgs e)
@@ -44,10 +76,10 @@ namespace AgentNativeApp
                 return;
             }
 
-            // Аль хэдийн суудал оноогдсон эсэхийг шалгах
-            if (!string.IsNullOrWhiteSpace(passenger.SeatNo))
+            if (!string.IsNullOrWhiteSpace(_passenger.SeatNo))
             {
-                MessageBox.Show($"Танд {passenger.SeatNo} суудал аль хэдийн оноогдсон байна!");
+                MessageBox.Show($"Танд {_passenger.SeatNo} суудал аль хэдийн оноогдсон байна!");
+             
                 return;
             }
 
@@ -58,7 +90,7 @@ namespace AgentNativeApp
                 return;
             }
 
-            var seatForm = new Seat(passenger, _seatService, _flightService);
+            var seatForm = new Seat(passenger, _seatService);
             seatForm.Show();
         }
 
@@ -68,6 +100,7 @@ namespace AgentNativeApp
         private void btnSearch_Click(object? sender, EventArgs e)
         {
             LoadPassengerByPassport(sender, EventArgs.Empty);
+
         }
 
         private async void LoadPassengerByPassport(object? sender, EventArgs e)
@@ -75,40 +108,42 @@ namespace AgentNativeApp
             var passport = PassportNumber.Text.Trim();
             if (string.IsNullOrWhiteSpace(passport)) return;
 
+            button2.Enabled = false;
+            btnPrintBP.Enabled = false;
+
+            //PassengerDto? passenger = null;
+
             try
             {
-                var passengerEntity = _passengerService.GetPassengerByPassport(passport);
-                if (passengerEntity == null)
-                {
-                    MessageBox.Show("Passenger олдсонгүй.");
-                    button2.Enabled = false;
-                    return;
-                }
-
-                var flight = _flightService.GetFlightById(passengerEntity.FlightId);
-
-                var passenger = _passengerService.GetPassengerDtoByPassport(passport);
+                var passenger = await _http.GetFromJsonAsync<PassengerDto>(
+                    $"https://localhost:7221/api/Passenger/{passport}");
                 if (passenger == null)
                 {
-                    MessageBox.Show("Passenger олдсонгүй.");
-                    button2.Enabled = false;
+                    MessageBox.Show("Passenger not found.");
                     return;
                 }
 
+                _passenger = passenger;
+
+                currentFlight = await _http.GetFromJsonAsync<Flight>($"https://localhost:7221/api/Flight/{_passenger.FlightId}");
                 // Нислэгийн төлөв харуулах
                 lblFlightStatus.Visible = true;
-                lblFlightStatus.Text = $"Нислэгийн төлөв: {passenger?.FlightStatus}";
+                lblFlightStatus.Text = $"Нислэгийн төлөв: {_passenger?.FlightStatus}";
 
                 // Суудлын мэдээлэл
-                lblAssignedSeat.Text = !string.IsNullOrWhiteSpace(passenger.SeatNo)
-                    ? $"Оноосон суудал: {passenger.SeatNo}"
+                lblAssignedSeat.Text = !string.IsNullOrWhiteSpace(_passenger.SeatNo)
+                    ? $"Оноосон суудал: {_passenger.SeatNo}"
                     : "Оноосон суудал байхгүй";
-
                 button2.Tag = passenger;
+
+                btnPrintBP.Enabled = !string.IsNullOrWhiteSpace(_passenger.SeatNo);
+
+                // Зөвхөн "Бүртгэж байна" үед болон суудал оноогдоогүй үед суудал оноох боломжтой болгоно
+                button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
             }
             catch (HttpRequestException ex)
             {
-                MessageBox.Show($"Өгөгдөл татах үед алдаа гарлаа: {ex.Message}");
+                MessageBox.Show($"API дуудах үед алдаа гарлаа: {ex.Message}");
                 button2.Enabled = false;
             }
         }

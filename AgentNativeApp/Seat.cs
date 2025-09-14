@@ -3,6 +3,7 @@ using Airport.services;
 using AirportLibrary.model;
 using AirportLibrary.services;
 using System.Data;
+using System.Net.Http.Json;
 using Button = System.Windows.Forms.Button;
 
 namespace AgentNativeApp
@@ -11,7 +12,7 @@ namespace AgentNativeApp
     {
         private readonly PassengerDto _passenger;
         private readonly SeatService _seatService;
-        private readonly FlightService _flightService;
+        private readonly HttpClient _http = new();
         private List<AirportLibrary.model.Seat> seats = new();
         private Flight currentFlight = null;
         private AirportLibrary.model.Seat? selectedSeat = null;
@@ -20,11 +21,10 @@ namespace AgentNativeApp
         private string? lastSelectedBtnText = null;
         private Color lastSelectedBtnColor;
 
-        public Seat(PassengerDto passenger, SeatService seatService, FlightService flightService)
+        public Seat(PassengerDto passenger, SeatService seatService)
         {
             _passenger = passenger;
             _seatService = seatService;
-            _flightService = flightService;
 
             InitializeComponent();
 
@@ -46,21 +46,14 @@ namespace AgentNativeApp
 
             if (!string.IsNullOrWhiteSpace(_passenger.SeatNo))
             {
-                var bpPrinter = new BoardingPassPrint(
-           _passenger.PassportNo,
-           _passenger.SeatNo,
-           currentFlight?.FlightCode ?? "Unknown",
-           _passenger.FullName
-       );
-                bpPrinter.Print();
-                MessageBox.Show($"Танд {_passenger.SeatNo} суудал аль хэдийн оноогдсон байна!");
+                MessageBox.Show($"Танд {_passenger.SeatNo} суудал аль хэдийн оноогдсон. Boarding pass хэвлэгдлээ!");
                 Close();
                 return;
             }
 
             ClearSeats();
 
-            var flight = _flightService.GetFlightById(_passenger.FlightId);
+            var flight = await _http.GetFromJsonAsync<Flight>($"https://localhost:7221/api/Flight/{_passenger.FlightId}");
             if (flight != null)
             {
                 currentFlight = flight;

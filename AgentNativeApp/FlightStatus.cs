@@ -1,10 +1,14 @@
 ﻿using AirportLibrary.services;
+using System.Text;
+using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace AgentNativeApp
 {
     public partial class FlightStatus : Form
     {
         private readonly FlightService _flightService;
+        private readonly HttpClient _http = new();
         public FlightStatus(FlightService flightService)
         {
             InitializeComponent();
@@ -29,7 +33,7 @@ namespace AgentNativeApp
             {
                 MessageBox.Show("Нислэгийн код хоосон байна.");
                 return;
-            }   
+            }
 
             string status = StatusBox.SelectedItem?.ToString() ?? "";
             if (string.IsNullOrWhiteSpace(status))
@@ -38,23 +42,20 @@ namespace AgentNativeApp
                 return;
             }
 
-            try
+            var request = new
             {
-                var flight = _flightService.GetFlightByCode(flightCode);
-                if(flight == null)
-                {
-                    MessageBox.Show($"Flight {flightCode} олдсонгүй.");
-                    return;
-                }
+                FlightCode = FlightCode.Text.Trim(),
+                Status = status
+            };
 
-                _flightService.UpdateFlightStatus(flight.Id, status);
+            var response = await _http.PutAsync("https://localhost:7221/api/Flight/UpdateStatus",
+                new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
-                lblStatus.Text = "✅ Амжилттай шинэчлэгдлээ.";
-            }
-            catch (Exception ex)
-            {
-                lblStatus.Text = "❌ Алдаа гарлаа: " + ex.Message;
-            }
+            var msg = await response.Content.ReadAsStringAsync();
+            lblStatus.Text = response.IsSuccessStatusCode
+                ? "✅ Амжилттай шинэчлэгдлээ."
+                : "❌ Алдаа гарлаа: " + msg;
+
         }
     }
 }

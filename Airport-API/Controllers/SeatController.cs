@@ -32,5 +32,25 @@ namespace Airport.Api.Controllers
                 return StatusCode(500, $"Алдаа гарлаа: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Нислэгийн үлдэгдэл сул суудлуудыг буцаана.
+        /// </summary>
+        /// <param name="flightId">Нислэгийн ID</param>
+        /// <returns>Сул байгаа суудлуудын жагсаалт.</returns>
+        [HttpGet("{flightId}/available")]
+        public IActionResult GetAvailableSeats(int flightId)
+        {
+            try
+            {
+                var seats = _seatService.GetAvailableSeats(flightId);
+                return Ok(seats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Алдаа гарлаа: {ex.Message}");
+            }
+        }
+
     }
 }

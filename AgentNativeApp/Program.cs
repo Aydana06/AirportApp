@@ -32,7 +32,7 @@ namespace AgentNativeApp
  
             var flightStatusForm = new FlightStatus(flightService);
 
-            var passengerForm = new Passenger(seatService, flightService, passengerService);
+            var passengerForm = new Passenger(seatService);
             //var passengerForm1 = new Passenger(seatService);
 
             flightStatusForm.Show();
@@ -40,7 +40,6 @@ namespace AgentNativeApp
             //passengerForm1.Show();
 
             Application.Run();
-
         }
     }
 }
