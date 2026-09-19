@@ -16,3 +16,4 @@ packages/
 # Temporary files
 *.tmp
 *.log
+*.db

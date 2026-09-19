@@ -100,7 +100,6 @@ namespace AgentNativeApp
         private void btnSearch_Click(object? sender, EventArgs e)
         {
             LoadPassengerByPassport(sender, EventArgs.Empty);
-
         }
 
         private async void LoadPassengerByPassport(object? sender, EventArgs e)
@@ -110,8 +109,6 @@ namespace AgentNativeApp
 
             button2.Enabled = false;
             btnPrintBP.Enabled = false;
-
-            //PassengerDto? passenger = null;
 
             try
             {
@@ -124,27 +121,28 @@ namespace AgentNativeApp
                 }
 
                 _passenger = passenger;
+                currentFlight = await _http.GetFromJsonAsync<Flight>(
+                    $"https://localhost:7221/api/Flight/{_passenger.FlightId}");
 
-                currentFlight = await _http.GetFromJsonAsync<Flight>($"https://localhost:7221/api/Flight/{_passenger.FlightId}");
-                // Нислэгийн төлөв харуулах
                 lblFlightStatus.Visible = true;
                 lblFlightStatus.Text = $"Нислэгийн төлөв: {_passenger?.FlightStatus}";
 
-                // Суудлын мэдээлэл
                 lblAssignedSeat.Text = !string.IsNullOrWhiteSpace(_passenger.SeatNo)
                     ? $"Оноосон суудал: {_passenger.SeatNo}"
                     : "Оноосон суудал байхгүй";
+
                 button2.Tag = passenger;
 
                 btnPrintBP.Enabled = !string.IsNullOrWhiteSpace(_passenger.SeatNo);
 
-                // Зөвхөн "Бүртгэж байна" үед болон суудал оноогдоогүй үед суудал оноох боломжтой болгоно
-                button2.Enabled = passenger.FlightStatus == "Бүртгэж байна" && string.IsNullOrWhiteSpace(passenger.SeatNo);
+                button2.Enabled = passenger.FlightStatus == "Бүртгэж байна"
+                                  && string.IsNullOrWhiteSpace(passenger.SeatNo);
             }
             catch (HttpRequestException ex)
             {
                 MessageBox.Show($"API дуудах үед алдаа гарлаа: {ex.Message}");
                 button2.Enabled = false;
+                btnPrintBP.Enabled = false;
             }
         }
         private void label3_Click(object sender, EventArgs e)
